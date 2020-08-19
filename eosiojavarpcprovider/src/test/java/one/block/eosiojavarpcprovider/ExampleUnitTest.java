@@ -177,7 +177,7 @@ public class ExampleUnitTest {
     public void sendTransactionTest() {
 
         MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setResponseCode(200).setBody(PUSH_TRANSACTION_RESPONSE));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(SEND_TRANSACTION_RESPONSE));
 
         try {
             server.start();
@@ -197,7 +197,7 @@ public class ExampleUnitTest {
             assertEquals("ae735820e26a7b771e1b522186294d7cbba035d0c31ca88237559d6c0a3bf00a",
                     response.getTransactionId());
         } catch (Exception ex) {
-            fail("Should not get exception when calling pushTransaction(): " + ex.getLocalizedMessage()
+            fail("Should not get exception when calling sendTransaction(): " + ex.getLocalizedMessage()
                     + "\n" + getStackTraceString(ex));
         } finally {
             try {
@@ -213,7 +213,7 @@ public class ExampleUnitTest {
     public void pushTransactionErrorTest() {
 
         MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setResponseCode(500).setBody(PUSH_TRANSACTION_ERROR_RESPONSE));
+        server.enqueue(new MockResponse().setResponseCode(500).setBody(SEND_TRANSACTION_ERROR_RESPONSE));
 
         try {
             server.start();
@@ -231,7 +231,7 @@ public class ExampleUnitTest {
             SendTransactionResponse response = rpcProvider.sendTransaction(request);
             fail("Push transaction should not succeed.");
         } catch (Exception ex) {
-            assertEquals("Error pushing transaction.", ex.getLocalizedMessage());
+            assertEquals("Error sending transaction.", ex.getLocalizedMessage());
             assertNotNull(ex.getCause());
             assertEquals("Bad status code: 500 (Server Error), returned from server. Additional error information: See further error information in RPCProviderError.", ex.getCause().getMessage());
             RPCResponseError rpcResponseError = ((EosioJavaRpcProviderCallError)ex.getCause()).getRpcResponseError();
