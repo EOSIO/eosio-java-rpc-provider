@@ -55,7 +55,7 @@ test {
 }
 
 def libraryGroupId = 'one.block'
-def libraryArtifactId = 'eosiojavarpcprovider'
+def libraryArtifactId = 'eosio-java-rpc-provider'
 def libraryVersion = '0.1.2'
 
 task sourcesJar(type: Jar, dependsOn: classes){
