@@ -113,7 +113,7 @@ artifactory {
             publications('jar')
             publishArtifacts = true
 
-            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
+            properties = ['qa.level': 'basic', 'dev.team': 'core']
             publishPom = true
         }
     }
