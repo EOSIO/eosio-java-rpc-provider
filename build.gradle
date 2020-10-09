@@ -30,7 +30,7 @@ allprojects {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'one.block:eosiojava:0.1.0'
+    implementation 'one.block:eosiojava:0.1.2'
 
     implementation 'org.jetbrains:annotations:17.0.0'
     implementation (group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1') {

@@ -34,7 +34,7 @@ Java RPC Provider is intended to be used in conjunction with [EOSIO SDK for Java
 To use Java RPC Provider with EOSIO SDK for Java in your app, add the following modules to your `build.gradle`:
 
 ```groovy
-implementation 'one.block:eosiojava:0.1.0'
+implementation 'one.block:eosiojava:0.1.2'
 implementation 'one.block:eosio-java-rpc-provider:0.1.1'
 ```
 
@@ -90,7 +90,7 @@ String balance = jsonArray.getString(0);
 
 10/09/20
 
-Version 0.1.1 The version consumes the eosio-java library version 0.1.0 and provides functionality equal to the older eosio-java-android-rpc-provider 0.1.1 release.
+Version 0.1.1 The version consumes the eosio-java library version 0.1.2 and provides functionality equal to the older eosio-java-android-rpc-provider 0.1.1 release.
 
 ## Want to help?
 
