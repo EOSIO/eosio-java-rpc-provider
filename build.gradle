@@ -1,0 +1,120 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java-library'
+    //Remove 'com.jfrog.artifactory' plugin if you are not using Artifactory
+    id 'com.jfrog.artifactory' version '4.10.0'
+    id 'maven-publish'
+
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+        //Remove maven{} block if you are not using Artifactory, otherwise define your own values in the gradle.properties file
+        maven {
+            credentials{
+                username artifactory_username
+                password artifactory_password
+            }
+            url artifactory_path_android_libraries
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'one.block:eosiojava:0.1.2'
+
+    implementation 'org.jetbrains:annotations:17.0.0'
+    implementation (group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1') {
+        exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    }
+    api 'com.squareup.retrofit2:retrofit:2.5.0'
+    api 'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.12.1'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:3.0.0'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    testImplementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    testImplementation 'com.squareup.okhttp3:logging-interceptor:3.12.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.12.1'
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+def libraryGroupId = 'one.block'
+def libraryArtifactId = 'eosio-java-rpc-provider'
+def libraryVersion = '0.1.1'
+
+task sourcesJar(type: Jar, dependsOn: classes){
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc){
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        jar(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            groupId libraryGroupId
+            version libraryVersion
+            artifactId libraryArtifactId
+
+            artifact("$buildDir/libs/${artifactId}.jar")
+        }
+    }
+}
+
+//Remove artifactory{} block if you are not using Artifactory
+artifactory {
+    contextUrl = artifactory_contextURL
+    publish {
+        repository {
+            repoKey = artifactory_repo
+
+            username = artifactory_username
+            password = artifactory_password
+        }
+        defaults {
+            publications('jar')
+            publishArtifacts = true
+
+            properties = ['qa.level': 'basic', 'dev.team': 'core']
+            publishPom = true
+        }
+    }
+}
