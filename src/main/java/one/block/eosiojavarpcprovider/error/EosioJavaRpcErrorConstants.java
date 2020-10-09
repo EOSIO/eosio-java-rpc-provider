@@ -49,6 +49,11 @@ public class EosioJavaRpcErrorConstants {
     public static final String RPC_PROVIDER_ERROR_PUSHING_TRANSACTION = "Error pushing transaction.";
 
     /**
+     * Error message gets thrown if {@link EosioJavaRpcProviderImpl#sendTransaction(SendTransactionRequest)} returns error.
+     */
+    public static final String RPC_PROVIDER_ERROR_SENDING_TRANSACTION = "Error sending transaction.";
+
+    /**
      * Error message gets thrown if {@link EosioJavaRpcProviderImpl#pushTransactions(RequestBody)} returns error.
      */
     public static final String RPC_PROVIDER_ERROR_PUSHING_TRANSACTIONS = "Error pushing transactions.";
