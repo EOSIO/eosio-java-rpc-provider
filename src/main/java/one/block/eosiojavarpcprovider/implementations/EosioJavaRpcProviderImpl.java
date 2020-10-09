@@ -2,6 +2,9 @@ package one.block.eosiojavarpcprovider.implementations;
 
 import com.google.gson.Gson;
 
+import one.block.eosiojava.error.rpcProvider.*;
+import one.block.eosiojava.models.rpcProvider.request.*;
+import one.block.eosiojava.models.rpcProvider.response.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -11,23 +14,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
-import one.block.eosiojava.error.rpcProvider.GetBlockRpcError;
-import one.block.eosiojava.error.rpcProvider.GetInfoRpcError;
-import one.block.eosiojava.error.rpcProvider.GetRawAbiRpcError;
-import one.block.eosiojava.error.rpcProvider.GetRequiredKeysRpcError;
-import one.block.eosiojava.error.rpcProvider.PushTransactionRpcError;
-import one.block.eosiojava.error.rpcProvider.RpcProviderError;
 import one.block.eosiojava.interfaces.IRPCProvider;
-import one.block.eosiojava.models.rpcProvider.request.GetBlockRequest;
-import one.block.eosiojava.models.rpcProvider.request.GetRawAbiRequest;
-import one.block.eosiojava.models.rpcProvider.request.GetRequiredKeysRequest;
-import one.block.eosiojava.models.rpcProvider.request.PushTransactionRequest;
-import one.block.eosiojava.models.rpcProvider.response.GetBlockResponse;
-import one.block.eosiojava.models.rpcProvider.response.GetInfoResponse;
-import one.block.eosiojava.models.rpcProvider.response.GetRawAbiResponse;
-import one.block.eosiojava.models.rpcProvider.response.GetRequiredKeysResponse;
-import one.block.eosiojava.models.rpcProvider.response.PushTransactionResponse;
-import one.block.eosiojava.models.rpcProvider.response.RPCResponseError;
 //import one.block.eosiojavarpcprovider.BuildConfig;
 import one.block.eosiojavarpcprovider.error.EosioJavaRpcErrorConstants;
 import one.block.eosiojavarpcprovider.error.EosioJavaRpcProviderCallError;
@@ -214,6 +201,23 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
             return processCall(syncCall);
         } catch (Exception ex) {
             throw new PushTransactionRpcError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_PUSHING_TRANSACTION,
+                    ex);
+        }
+    }
+
+    /**
+     * Send a given transaction to the blockchain and process the response.
+     * @param sendTransactionRequest the transaction to send with signatures.
+     * @return SendTransactionResponse on successful return.
+     * @throws SendTransactionRpcError Thrown if any errors occur calling or processing the request.
+     */
+    public @NotNull SendTransactionResponse sendTransaction(
+            SendTransactionRequest sendTransactionRequest) throws SendTransactionRpcError {
+        try {
+            Call<SendTransactionResponse> syncCall = this.rpcProviderApi.sendTransaction(sendTransactionRequest);
+            return processCall(syncCall);
+        } catch (Exception ex) {
+            throw new SendTransactionRpcError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_SENDING_TRANSACTION,
                     ex);
         }
     }
