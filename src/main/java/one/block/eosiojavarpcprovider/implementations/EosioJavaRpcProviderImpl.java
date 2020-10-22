@@ -139,7 +139,6 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
      * @return GetBlockRsponse on successful return.
      * @throws GetBlockRpcError Thrown if any errors occur calling or processing the request.
      */
-    @Override
     public @NotNull GetBlockResponse getBlock(GetBlockRequest getBlockRequest)
             throws GetBlockRpcError {
         try {
@@ -147,6 +146,24 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
             return processCall(syncCall);
         } catch (Exception ex) {
             throw new GetBlockRpcError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_GETTING_BLOCK_INFO,
+                    ex);
+        }
+    }
+
+    /**
+     * Issue a getBlockInfo() call to the blockchain and process the response.
+     * @param getBlockInfoRequest Info about a specific block.
+     * @return GetBlockInfoResponse on successful return.
+     * @throws GetBlockInfoRpcError Thrown if any errors occur calling or processing the request.
+     */
+    @Override
+    public @NotNull GetBlockInfoResponse getBlockInfo(GetBlockInfoRequest getBlockInfoRequest)
+            throws GetBlockInfoRpcError {
+        try {
+            Call<GetBlockInfoResponse> syncCall = this.rpcProviderApi.getBlockInfo(getBlockInfoRequest);
+            return processCall(syncCall);
+        } catch (Exception ex) {
+            throw new GetBlockInfoRpcError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_GETTING_BLOCK_INFO,
                     ex);
         }
     }
@@ -389,6 +406,23 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
             }
         } catch (Exception ex) {
             throw new RpcProviderError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_GET_TABLE_ROWS, ex);
+        }
+    }
+
+    /**
+     * Issue a getKvTableRows() call to the blockchain and process the response.
+     * @param requestBody request body of get_kv_table_rows API
+     * @return String content of ResponseBody on successful return.
+     * @throws RpcProviderError Thrown if any errors occur calling or processing the request.
+     */
+    public @NotNull String getKvTableRows(RequestBody requestBody) throws RpcProviderError {
+        try {
+            Call<ResponseBody> syncCall = this.rpcProviderApi.getKvTableRows(requestBody);
+            try(ResponseBody responseBody = processCall(syncCall)) {
+                return responseBody.string();
+            }
+        } catch (Exception ex) {
+            throw new RpcProviderError(EosioJavaRpcErrorConstants.RPC_PROVIDER_ERROR_GET_KV_TABLE_ROWS, ex);
         }
     }
 

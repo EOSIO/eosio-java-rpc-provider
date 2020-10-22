@@ -38,6 +38,16 @@ public interface IEosioJavaRpcProviderApi {
     Call<GetBlockResponse> getBlock(@Body GetBlockRequest getBlockRequest);
 
     /**
+     * Retrofit POST call to "chain/get_block_info" to an EOSIO blockchain.
+     * This method gets called from {@link EosioJavaRpcProviderImpl#getBlockInfo(GetBlockInfoRequest)} to get info/status of a specific block in the request.
+     *
+     * @param getBlockInfoRequest of a specific block.
+     * @return Executable {@link Call} to return {@link GetBlockResponse} has the info/status of a specific block in the request.
+     */
+    @POST("v1/chain/get_block_info")
+    Call<GetBlockInfoResponse> getBlockInfo(@Body GetBlockInfoRequest getBlockInfoRequest);
+
+    /**
      * Retrofit POST call to "chain/get_raw_abi" to an EOSIO blockchain.
      * This method gets called from {@link EosioJavaRpcProviderImpl#getRawAbi(GetRawAbiRequest)} to get serialized ABI of a smart contract in the request.
      *
@@ -180,6 +190,16 @@ public interface IEosioJavaRpcProviderApi {
      */
     @POST("v1/chain/get_table_rows")
     Call<ResponseBody> getTableRows(@Body RequestBody requestBody);
+
+    /**
+     * Retrofit POST call to "chain/get_kv_table_rows" to an EOSIO blockchain.
+     * This method gets called from {@link EosioJavaRpcProviderImpl#getKvTableRows(RequestBody)}
+     *
+     * @param requestBody the request body to call 'get_kv_table_rows' API
+     * @return Executable {@link Call} to return {@link ResponseBody} of 'get_table_rows' API
+     */
+    @POST("v1/chain/get_kv_table_rows")
+    Call<ResponseBody> getKvTableRows(@Body RequestBody requestBody);
 
     /**
      * Retrofit POST call to "chain/get_code" to an EOSIO blockchain.

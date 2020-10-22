@@ -104,6 +104,11 @@ public class EosioJavaRpcErrorConstants {
     public static final String RPC_PROVIDER_ERROR_GET_TABLE_ROWS = "Error get table rows.";
 
     /**
+     * Error message gets thrown if {@link EosioJavaRpcProviderImpl#getKvTableRows(RequestBody)} returns error.
+     */
+    public static final String RPC_PROVIDER_ERROR_GET_KV_TABLE_ROWS = "Error get kv table rows.";
+
+    /**
      * Error message gets thrown if {@link EosioJavaRpcProviderImpl#getCode(RequestBody)} returns error.
      */
     public static final String RPC_PROVIDER_ERROR_GET_CODE = "Error get code.";
