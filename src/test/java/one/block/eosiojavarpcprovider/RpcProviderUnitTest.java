@@ -104,6 +104,39 @@ public class RpcProviderUnitTest {
     }
 
     @Test
+    public void getBlockInfoTest() {
+
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(GET_BLOCK_INFO_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+            GetBlockInfoRequest request = new GetBlockInfoRequest(new BigInteger("25260032"));
+            GetBlockInfoResponse response = rpcProvider.getBlockInfo(request);
+            assertNotNull(response);
+            assertEquals("0181700002e623f2bf291b86a10a5cec4caab4954d4231f31f050f4f86f26116",
+                    response.getId());
+            assertEquals(new BigInteger("2249927103"), response.getRefBlockPrefix());
+            assertEquals("de5493939e3abdca80deeab2fc9389cc43dc1982708653cfe6b225eb788d6659",
+                    response.getActionMroot());
+        } catch (Exception ex) {
+            fail("Should not get exception when calling getBlockInfo(): " + ex.getLocalizedMessage()
+                    + "\n" + getStackTraceString(ex));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+
+    }
+
+    @Test
     public void getRawAbiTest() {
 
         MockWebServer server = new MockWebServer();
@@ -738,6 +771,40 @@ public class RpcProviderUnitTest {
             assertEquals("1000.0000 EOS", firstObject.get("balance"));
         } catch (Exception ex) {
             fail("Should not get exception when calling getTableRows(): " + ex.getLocalizedMessage()
+                    + "\n" + getStackTraceString(ex));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+    }
+
+    @Test
+    public void testGetKvTableRowsRpcCall() {
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(GET_KV_TABLE_ROWS_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+
+            RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), GET_KV_TABLE_ROWS_REQUEST);
+            String response = rpcProvider.getKvTableRows(requestBody);
+            assertNotNull(response);
+
+            JSONObject jsonObject = (JSONObject)parser.parse(response);
+            JSONArray jsonArray = (JSONArray)jsonObject.get("rows");
+            assertEquals(1, jsonArray.size());
+            String firstSerializedResult = (String)jsonArray.get(0);
+            assertEquals("002462663538316265652d396632632d343437622d393461642d3738653439383462366635312462663538316265652d396632632d343437622d393461642d37386534393834623666353100000000004013cd2462663538316265652d396632632d343437622d393461642d3738653439383462366635311a57726974652048656c6c6f20576f726c6420436f6e74726163742462663538316265652d396632632d343437622d393461642d373865343938346236663531002462663538316265652d396632632d343437622d393461642d37386534393834623666353194398a5f",
+                    firstSerializedResult);
+        } catch (Exception ex) {
+            fail("Should not get exception when calling getKvTableRows(): " + ex.getLocalizedMessage()
                     + "\n" + getStackTraceString(ex));
         } finally {
             try {
