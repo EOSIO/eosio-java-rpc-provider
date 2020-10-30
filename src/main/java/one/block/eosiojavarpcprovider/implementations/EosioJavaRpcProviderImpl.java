@@ -210,7 +210,6 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
      * @return PushTransactionResponse on successful return.
      * @throws PushTransactionRpcError Thrown if any errors occur calling or processing the request.
      */
-    @Override
     public @NotNull PushTransactionResponse pushTransaction(
             PushTransactionRequest pushTransactionRequest) throws PushTransactionRpcError {
         try {
