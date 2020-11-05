@@ -34,8 +34,8 @@ Java RPC Provider is intended to be used in conjunction with [EOSIO SDK for Java
 To use Java RPC Provider with EOSIO SDK for Java in your app, add the following modules to your `build.gradle`:
 
 ```groovy
-implementation 'one.block:eosiojava:0.1.5'
-implementation 'one.block:eosio-java-rpc-provider:0.1.4'
+implementation 'one.block:eosiojava:1.0.0'
+implementation 'one.block:eosio-java-rpc-provider:1.0.0'
 ```
 
 The `build.gradle` files for the project currently include configurations for publishing the project to Artifactory.  These should be removed if you are not planning to use Artifactory or you will encounter build errors.  To do so, make the changes marked by comments throughout the files.
@@ -101,6 +101,10 @@ Version 0.1.4
 This version consumes the eosio-java library version 0.1.5 and adds support for the get_block_info, and get_kv_table_rows endpoints.  
 GetBlockInfo has replaced GetBlock in the IRPCProvider interface since it is the preferred method for getting the information required to calculate TAPOS.  GetBlock is still available.  
 PushTransaction has been removed from IRPCProvider in favor of SendTransaction.  PushTransaction is still available.
+
+11/05/2020
+Version 1.0.0
+Support for EOSIO 3.0 functionality, including action return values and KV tables.  Project jar implemenation that works on both Android and server side Java.
 
 ## Want to help?
 
