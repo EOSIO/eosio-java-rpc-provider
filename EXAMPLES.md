@@ -21,7 +21,7 @@ try {
     JSONObject jsonObject = (JSONObject)parser.parse(response);
 
     String account_name = (String) jsonObject.get("account_name");
-    BigInteger ramQuota = (BigInteger) jsonObject.get("ram_quota");
+    Double ramQuota = (Double) jsonObject.get("ram_quota");
     JSONArray permissions = (JSONArray) jsonObject.get("permissions");
     JSONObject permission = (JSONObject) permissions.get(0);
     String permissionName = (String) permission.get("perm_name");
