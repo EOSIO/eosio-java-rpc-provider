@@ -36,7 +36,7 @@ import java.util.Collections;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
-// Remove this annotation to run the tests.
+// Comment this annotation to run the tests.
 @Ignore
 public class LiveServerUnitTest {
     private JSONParser parser;
@@ -47,9 +47,9 @@ public class LiveServerUnitTest {
     private TransactionSession session;
     private TransactionProcessor processor;
 
-    private static final String nodeUrl = "https://my.test.blockchain";
+    private static final String nodeUrl = "http://my.test.blockchain";
     private static final boolean ENABLE_NETWORK_LOG = true;
-    private static final String privateKey = "MyTestPrivateKey";
+    private static final String privateKey = "MyTestKey";
 
     @Before
     public void setup() {
@@ -182,10 +182,11 @@ public class LiveServerUnitTest {
             JSONArray jsonArray = (JSONArray)jsonObject.get("rows");
             // Right now we can only get back the serialized form of the rows so we're only checking that.
             String jsonArrayStr = jsonArray.toString();
-            assertTrue(jsonArrayStr.contains("\"0000000000a0a679044a616e6503446f650d31323334204d79\""));
-            assertTrue(jsonArrayStr.contains("\"0000000000301b7d044a6f686e05536d6974680c313233204d\""));
-            assertTrue(jsonArrayStr.contains("\"0000000000801d8d044c6f6973044c616e650d35343332204d\""));
-            assertTrue(jsonArrayStr.contains("\"0000000000b555c6055374657665054a6f6e65730c33323120\""));
+            assertTrue(jsonArray.size() == 4);
+            JSONObject entry1 = (JSONObject)jsonArray.get(0);
+            assertEquals("jane", (String) entry1.get("account_name"));
+            assertEquals("Jane", (String) entry1.get("first_name"));
+            assertEquals("Doe", (String) entry1.get("last_name"));
             System.out.println("Finished! Got back rows:" + jsonArrayStr);
         } catch (Exception getKvTableRowError) {
             fail("Error getting kv table rows: " + getKvTableRowError.getLocalizedMessage());
