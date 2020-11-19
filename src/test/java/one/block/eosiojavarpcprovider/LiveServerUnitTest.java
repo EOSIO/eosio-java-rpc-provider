@@ -182,7 +182,7 @@ public class LiveServerUnitTest {
             JSONArray jsonArray = (JSONArray)jsonObject.get("rows");
             // Right now we can only get back the serialized form of the rows so we're only checking that.
             String jsonArrayStr = jsonArray.toString();
-            assertTrue(jsonArray.size() == 4);
+            assertEquals(4, jsonArray.size());
             JSONObject entry1 = (JSONObject)jsonArray.get(0);
             assertEquals("jane", (String) entry1.get("account_name"));
             assertEquals("Jane", (String) entry1.get("first_name"));
