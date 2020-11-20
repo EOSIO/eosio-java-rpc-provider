@@ -66,3 +66,4 @@ lint/tmp/
 
 gradle.properties
 
+.DS_Store

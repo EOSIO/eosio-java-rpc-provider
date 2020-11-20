@@ -36,6 +36,20 @@ public class RpcTestConstants {
             + "    \"ref_block_prefix\": 2249927103\n"
             + "}";
 
+    public static final String GET_BLOCK_INFO_RESPONSE = "{\n"
+            + "    \"timestamp\": \"2019-02-21T18:31:40.000\",\n"
+            + "    \"producer\": \"blkproducer2\",\n"
+            + "    \"confirmed\": 0,\n"
+            + "    \"previous\": \"01816fffa4548475add3c45d0e0620f59468a6817426137b37851c23ccafa9cc\",\n"
+            + "    \"transaction_mroot\": \"0000000000000000000000000000000000000000000000000000000000000000\",\n"
+            + "    \"action_mroot\": \"de5493939e3abdca80deeab2fc9389cc43dc1982708653cfe6b225eb788d6659\",\n"
+            + "    \"schedule_version\": 3,\n"
+            + "    \"producer_signature\": \"SIG_K1_KZ3ptku7orAgcyMzd9FKW4jPC9PvjW9BGadFoyxdJFWM44VZdjW28DJgDe6wkNHAxnpqCWSzaBHB1AfbXBUn3HDzetemoA\",\n"
+            + "    \"id\": \"0181700002e623f2bf291b86a10a5cec4caab4954d4231f31f050f4f86f26116\",\n"
+            + "    \"block_num\": 25260032,\n"
+            + "    \"ref_block_prefix\": 2249927103\n"
+            + "}";
+
     public static final String GET_RAW_EOSIO_TOKEN_ABI_RESPONSE = "{\n"
             + "    \"account_name\": \"eosio.token\",\n"
             + "    \"code_hash\": \"3e0cf4172ab025f9fff5f1db11ee8a34d44779492e1d668ae1dc2d129e865348\",\n"
@@ -677,6 +691,24 @@ public class RpcTestConstants {
             "        }\n" +
             "    ],\n" +
             "    \"more\": false\n" +
+            "}";
+
+    public static final String GET_KV_TABLE_ROWS_REQUEST = "{\n" +
+            "    \"json\" : false\n" +
+            "    \"code\" : \"todo\"\n" +
+            "    \"table\" : \"todo\"\n" +
+            "    \"encode_type\" : \"string\"\n" +
+            "    \"index_name\" : \"uuid\"\n" +
+            "    \"index_value\" : \"bf581bee-9f2c-447b-94ad-78e4984b6f51\"\n" +
+            "    \"reverse\" : false\n" +
+            "    \"show_payer\" : false\n" +
+            "}";
+    public static final String GET_KV_TABLE_ROWS_RESPONSE = "{\n" +
+            "    \"rows\": [\n" +
+            "        \"002462663538316265652d396632632d343437622d393461642d3738653439383462366635312462663538316265652d396632632d343437622d393461642d37386534393834623666353100000000004013cd2462663538316265652d396632632d343437622d393461642d3738653439383462366635311a57726974652048656c6c6f20576f726c6420436f6e74726163742462663538316265652d396632632d343437622d393461642d373865343938346236663531002462663538316265652d396632632d343437622d393461642d37386534393834623666353194398a5f\"\n" +
+            "    ],\n" +
+            "    \"more\": false,\n" +
+            "    \"next_key\": \"\"\n" +
             "}";
 
     public static final String GET_TABLE_BY_SCOPE_REQUEST = "{\n" +

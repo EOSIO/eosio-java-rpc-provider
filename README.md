@@ -34,8 +34,8 @@ Java RPC Provider is intended to be used in conjunction with [EOSIO SDK for Java
 To use Java RPC Provider with EOSIO SDK for Java in your app, add the following modules to your `build.gradle`:
 
 ```groovy
-implementation 'one.block:eosiojava:0.1.2'
-implementation 'one.block:eosio-java-rpc-provider:0.1.1'
+implementation 'one.block:eosiojava:1.0.0'
+implementation 'one.block:eosio-java-rpc-provider:1.0.0'
 ```
 
 The `build.gradle` files for the project currently include configurations for publishing the project to Artifactory.  These should be removed if you are not planning to use Artifactory or you will encounter build errors.  To do so, make the changes marked by comments throughout the files.
@@ -63,10 +63,10 @@ Please note that only the following five RPC endpoints have proper response mars
 
 ```java
  Call<GetInfoResponse> getInfo();
- Call<GetBlockResponse> getBlock(@Body GetBlockRequest getBlockRequest);
+ Call<GetBlockInfoResponse> getBlockInfo(@Body GetBlockInfoRequest getBlockInfoRequest);
  Call<GetRawAbiResponse> getRawAbi(@Body GetRawAbiRequest getRawAbiRequest);
  Call<GetRequiredKeysResponse> getRequiredKeys(@Body GetRequiredKeysRequest getRequiredKeysRequest);
- Call<PushTransactionResponse> pushTransaction(@Body PushTransactionRequest pushTransactionRequest);
+ Call<SendTransactionResponse> sendTransaction(@Body SendTransactionRequest sendTransactionRequest);
 ```
 
 The remaining endpoints accept a `RequestBody` as the request object and return a raw JSON string as the response. We aim to continue improving response marshalling for all endpoints, and we invite you to [help us improve](https://github.com/EOSIO/eosio-java-android-rpc-provider/issues/22) responses too. Check [EosioJavaRpcProviderImpl](https://github.com/EOSIO/eosio-java-android-rpc-provider/blob/master/eosiojavarpcprovider/src/main/java/one/block/eosiojavarpcprovider/implementations/EosioJavaRpcProviderImpl.java) for more details.
@@ -88,9 +88,23 @@ String balance = jsonArray.getString(0);
 
 ## Releases
 
-10/09/20
+10/01/20
+Version 0.1.1 
+This version consumes the eosio-java library version 0.1.2 and provides functionality equal to the older eosio-java-android-rpc-provider 0.1.1 release.
 
-Version 0.1.1 The version consumes the eosio-java library version 0.1.2 and provides functionality equal to the older eosio-java-android-rpc-provider 0.1.1 release.
+10/09/20
+Version 0.1.3 
+This version consumes the eosio-java library version 0.1.3 and adds support for the send_transaction endpoint, and return values.
+
+10/22/20
+Version 0.1.4
+This version consumes the eosio-java library version 0.1.5 and adds support for the get_block_info, and get_kv_table_rows endpoints.  
+GetBlockInfo has replaced GetBlock in the IRPCProvider interface since it is the preferred method for getting the information required to calculate TAPOS.  GetBlock is still available.  
+PushTransaction has been removed from IRPCProvider in favor of SendTransaction.  PushTransaction is still available.
+
+11/05/2020
+Version 1.0.0
+Support for EOSIO 3.0 functionality, including action return values and KV tables.  Project jar implemenation that works on both Android and server side Java.
 
 ## Want to help?
 

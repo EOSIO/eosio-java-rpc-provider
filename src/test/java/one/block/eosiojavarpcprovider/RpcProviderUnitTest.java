@@ -1,31 +1,14 @@
 package one.block.eosiojavarpcprovider;
 
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.math.BigInteger;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.RequestBody;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.SocketPolicy;
-import one.block.eosiojava.error.rpcProvider.GetBlockRpcError;
-import one.block.eosiojava.models.rpcProvider.Action;
-import one.block.eosiojava.models.rpcProvider.Authorization;
-import one.block.eosiojava.models.rpcProvider.Transaction;
+import one.block.eosiojava.error.rpcProvider.PushTransactionRpcError;
+import one.block.eosiojava.error.rpcProvider.SendTransactionRpcError;
+import one.block.eosiojava.models.rpcProvider.request.GetBlockInfoRequest;
 import one.block.eosiojava.models.rpcProvider.request.GetBlockRequest;
 import one.block.eosiojava.models.rpcProvider.request.GetRawAbiRequest;
 import one.block.eosiojava.models.rpcProvider.request.GetRequiredKeysRequest;
 import one.block.eosiojava.models.rpcProvider.request.PushTransactionRequest;
+import one.block.eosiojava.models.rpcProvider.request.SendTransactionRequest;
+import one.block.eosiojava.models.rpcProvider.response.GetBlockInfoResponse;
 import one.block.eosiojava.models.rpcProvider.response.GetBlockResponse;
 import one.block.eosiojava.models.rpcProvider.response.GetInfoResponse;
 import one.block.eosiojava.models.rpcProvider.response.GetRawAbiResponse;
@@ -33,6 +16,29 @@ import one.block.eosiojava.models.rpcProvider.response.GetRequiredKeysResponse;
 import one.block.eosiojava.models.rpcProvider.response.PushTransactionResponse;
 import one.block.eosiojava.models.rpcProvider.response.RPCResponseError;
 import one.block.eosiojava.models.rpcProvider.response.RpcError;
+import one.block.eosiojava.models.rpcProvider.response.SendTransactionResponse;
+import one.block.eosiojavarpcprovider.error.EosioJavaRpcProviderInitializerError;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.math.BigInteger;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.RequestBody;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
+import one.block.eosiojava.models.rpcProvider.Action;
+import one.block.eosiojava.models.rpcProvider.Authorization;
+import one.block.eosiojava.models.rpcProvider.Transaction;
 import one.block.eosiojavarpcprovider.error.EosioJavaRpcProviderCallError;
 import one.block.eosiojavarpcprovider.implementations.EosioJavaRpcProviderImpl;
 
@@ -40,11 +46,6 @@ import static one.block.eosiojavarpcprovider.RpcTestConstants.*;
 
 import static org.junit.Assert.*;
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
 public class RpcProviderUnitTest {
 
     private JSONParser parser;
@@ -106,6 +107,39 @@ public class RpcProviderUnitTest {
                     response.getActionMroot());
         } catch (Exception ex) {
             fail("Should not get exception when calling getBlock(): " + ex.getLocalizedMessage()
+                    + "\n" + getStackTraceString(ex));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+
+    }
+
+    @Test
+    public void getBlockInfoTest() {
+
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(GET_BLOCK_INFO_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+            GetBlockInfoRequest request = new GetBlockInfoRequest(new BigInteger("25260032"));
+            GetBlockInfoResponse response = rpcProvider.getBlockInfo(request);
+            assertNotNull(response);
+            assertEquals("0181700002e623f2bf291b86a10a5cec4caab4954d4231f31f050f4f86f26116",
+                    response.getId());
+            assertEquals(new BigInteger("2249927103"), response.getRefBlockPrefix());
+            assertEquals("de5493939e3abdca80deeab2fc9389cc43dc1982708653cfe6b225eb788d6659",
+                    response.getActionMroot());
+        } catch (Exception ex) {
+            fail("Should not get exception when calling getBlockInfo(): " + ex.getLocalizedMessage()
                     + "\n" + getStackTraceString(ex));
         } finally {
             try {
@@ -205,9 +239,15 @@ public class RpcProviderUnitTest {
             assertNotNull(response);
             assertEquals("ae735820e26a7b771e1b522186294d7cbba035d0c31ca88237559d6c0a3bf00a",
                     response.getTransactionId());
-        } catch (Exception ex) {
-            fail("Should not get exception when calling pushTransaction(): " + ex.getLocalizedMessage()
-                    + "\n" + getStackTraceString(ex));
+        } catch (EosioJavaRpcProviderInitializerError eosioJavaRpcProviderInitializerError) {
+            fail("Should not get exception when initializing rpcProvider: " + eosioJavaRpcProviderInitializerError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(eosioJavaRpcProviderInitializerError));
+        } catch (PushTransactionRpcError pushTransactionRpcError) {
+            fail("Should not get exception when pushing transaction: " + pushTransactionRpcError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(pushTransactionRpcError));
+        } catch (IOException e) {
+            fail("Should not get exception starting mock webserver: " + e.getLocalizedMessage()
+                    + "\n" + getStackTraceString(e));
         } finally {
             try {
                 server.shutdown();
@@ -239,11 +279,11 @@ public class RpcProviderUnitTest {
                     "C62A4F5C1CEF3D6D71BD000000000290AFC2D800EA3055000000405DA7ADBA0072CBDD956F52ACD910C3C958136D72F8560D1846BC7CF3157F5FBFB72D3001DE4597F4A1FDBECDA6D59C96A43009FC5E5D7B8F639B1269C77CEC718460DCC19CB30100A6823403EA3055000000572D3CCDCD0143864D5AF0FE294D44D19C612036CBE8C098414C4A12A5A7BB0BFE7DB155624800A6823403EA3055000000572D3CCDCD0100AEAA4AC15CFD4500000000A8ED32323B00AEAA4AC15CFD4500000060D234CD3DA06806000000000004454F53000000001A746865206772617373686F70706572206C69657320686561767900");
             PushTransactionResponse response = rpcProvider.pushTransaction(request);
             fail("Push transaction should not succeed.");
-        } catch (Exception ex) {
-            assertEquals("Error pushing transaction.", ex.getLocalizedMessage());
-            assertNotNull(ex.getCause());
-            assertEquals("Bad status code: 500 (Server Error), returned from server. Additional error information: See further error information in RPCProviderError.", ex.getCause().getMessage());
-            RPCResponseError rpcResponseError = ((EosioJavaRpcProviderCallError)ex.getCause()).getRpcResponseError();
+        } catch (PushTransactionRpcError pushTransactionRpcError) {
+            assertEquals("Error pushing transaction.", pushTransactionRpcError.getLocalizedMessage());
+            assertNotNull(pushTransactionRpcError.getCause());
+            assertEquals("Bad status code: 500 (Server Error), returned from server. Additional error information: See further error information in RPCProviderError.", pushTransactionRpcError.getCause().getMessage());
+            RPCResponseError rpcResponseError = ((EosioJavaRpcProviderCallError)pushTransactionRpcError.getCause()).getRpcResponseError();
             assertNotNull(rpcResponseError);
             assertEquals(new BigInteger("500"), rpcResponseError.getCode());
             assertEquals("Internal Service Error", rpcResponseError.getMessage());
@@ -251,6 +291,103 @@ public class RpcProviderUnitTest {
             assertNotNull(rpcError);
             assertEquals(new BigInteger("3040005"), rpcError.getCode());
             assertEquals("Expired Transaction", rpcError.getWhat());
+        } catch (EosioJavaRpcProviderInitializerError eosioJavaRpcProviderInitializerError) {
+            fail("Should not get exception when initializing rpcProvider: " + eosioJavaRpcProviderInitializerError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(eosioJavaRpcProviderInitializerError));
+        } catch (IOException e) {
+            fail("Should not get exception starting mock webserver: " + e.getLocalizedMessage()
+                    + "\n" + getStackTraceString(e));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+
+    }
+
+    @Test
+    public void sendTransactionTest() {
+
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(PUSH_TRANSACTION_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+
+            List<String> signatures = new ArrayList<>();
+            signatures.add("SIG_K1_JzFA9ffefWfrTBvpwMwZi81kR6tvHF4mfsRekVXrBjLWWikg9g1FrS9WupYuoGaRew5mJhr4d39tHUjHiNCkxamtEfxi68");
+            SendTransactionRequest request = new SendTransactionRequest(signatures,
+                    0,
+                    "",
+                    "C62A4F5C1CEF3D6D71BD000000000290AFC2D800EA3055000000405DA7ADBA0072CBDD956F52ACD910C3C958136D72F8560D1846BC7CF3157F5FBFB72D3001DE4597F4A1FDBECDA6D59C96A43009FC5E5D7B8F639B1269C77CEC718460DCC19CB30100A6823403EA3055000000572D3CCDCD0143864D5AF0FE294D44D19C612036CBE8C098414C4A12A5A7BB0BFE7DB155624800A6823403EA3055000000572D3CCDCD0100AEAA4AC15CFD4500000000A8ED32323B00AEAA4AC15CFD4500000060D234CD3DA06806000000000004454F53000000001A746865206772617373686F70706572206C69657320686561767900");
+            SendTransactionResponse response = rpcProvider.sendTransaction(request);
+            assertNotNull(response);
+            assertEquals("ae735820e26a7b771e1b522186294d7cbba035d0c31ca88237559d6c0a3bf00a",
+                    response.getTransactionId());
+        } catch (EosioJavaRpcProviderInitializerError eosioJavaRpcProviderInitializerError) {
+            fail("Should not get exception when initializing rpcProvider: " + eosioJavaRpcProviderInitializerError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(eosioJavaRpcProviderInitializerError));
+        } catch (SendTransactionRpcError sendTransactionRpcError) {
+            fail("Should not get exception when sending transaction: " + sendTransactionRpcError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(sendTransactionRpcError));
+        } catch (IOException e) {
+            fail("Should not get exception starting mock webserver: " + e.getLocalizedMessage()
+                    + "\n" + getStackTraceString(e));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+
+    }
+
+    @Test
+    public void sendTransactionErrorTest() {
+
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(500).setBody(PUSH_TRANSACTION_ERROR_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+
+            List<String> signatures = new ArrayList<>();
+            signatures.add("SIG_K1_JzFA9ffefWfrTBvpwMwZi81kR6tvHF4mfsRekVXrBjLWWikg9g1FrS9WupYuoGaRew5mJhr4d39tHUjHiNCkxamtEfxi68");
+            SendTransactionRequest request = new SendTransactionRequest(signatures,
+                    0,
+                    "",
+                    "C62A4F5C1CEF3D6D71BD000000000290AFC2D800EA3055000000405DA7ADBA0072CBDD956F52ACD910C3C958136D72F8560D1846BC7CF3157F5FBFB72D3001DE4597F4A1FDBECDA6D59C96A43009FC5E5D7B8F639B1269C77CEC718460DCC19CB30100A6823403EA3055000000572D3CCDCD0143864D5AF0FE294D44D19C612036CBE8C098414C4A12A5A7BB0BFE7DB155624800A6823403EA3055000000572D3CCDCD0100AEAA4AC15CFD4500000000A8ED32323B00AEAA4AC15CFD4500000060D234CD3DA06806000000000004454F53000000001A746865206772617373686F70706572206C69657320686561767900");
+            SendTransactionResponse response = rpcProvider.sendTransaction(request);
+            fail("Push transaction should not succeed.");
+        } catch (SendTransactionRpcError sendTransactionRpcError) {
+            assertEquals("Error sending transaction.", sendTransactionRpcError.getLocalizedMessage());
+            assertNotNull(sendTransactionRpcError.getCause());
+            assertEquals("Bad status code: 500 (Server Error), returned from server. Additional error information: See further error information in RPCProviderError.", sendTransactionRpcError.getCause().getMessage());
+            RPCResponseError rpcResponseError = ((EosioJavaRpcProviderCallError)sendTransactionRpcError.getCause()).getRpcResponseError();
+            assertNotNull(rpcResponseError);
+            assertEquals(new BigInteger("500"), rpcResponseError.getCode());
+            assertEquals("Internal Service Error", rpcResponseError.getMessage());
+            RpcError rpcError = rpcResponseError.getError();
+            assertNotNull(rpcError);
+            assertEquals(new BigInteger("3040005"), rpcError.getCode());
+            assertEquals("Expired Transaction", rpcError.getWhat());
+        } catch (EosioJavaRpcProviderInitializerError eosioJavaRpcProviderInitializerError) {
+            fail("Should not get exception when initializing rpcProvider: " + eosioJavaRpcProviderInitializerError.getLocalizedMessage()
+                    + "\n" + getStackTraceString(eosioJavaRpcProviderInitializerError));
+        } catch (IOException e) {
+            fail("Should not get exception starting mock webserver: " + e.getLocalizedMessage()
+                    + "\n" + getStackTraceString(e));
         } finally {
             try {
                 server.shutdown();
@@ -292,70 +429,6 @@ public class RpcProviderUnitTest {
         }
 
     }
-
-    // Is this test necessary?
-//    @Test
-//    public void getBlockAsyncTest() {
-//
-//        // This test shows how an RPC provider call might be made asynchronously.
-//
-//        final CountDownLatch testLock = new CountDownLatch(1);
-//
-//        MockWebServer server = new MockWebServer();
-//        server.enqueue(new MockResponse().setResponseCode(200).setBody(GET_BLOCK_RESPONSE));
-//
-//        try {
-//            server.start();
-//            String baseUrl = server.url("/").toString();
-//
-//            final EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
-//                    baseUrl);
-//            GetBlockRequest[] request = { new GetBlockRequest("25260032") };
-//
-//            AsyncTask<GetBlockRequest, Void, GetBlockResponse> asyncTask = new AsyncTask<GetBlockRequest, Void, GetBlockResponse>() {
-//                GetBlockRpcError getBlockError = null;
-//                @Override
-//                protected GetBlockResponse doInBackground(GetBlockRequest... getBlockRequests) {
-//                    // Here we are on a background thread.
-//                    GetBlockResponse response = null;
-//                    try {
-//                        response = rpcProvider.getBlock(getBlockRequests[0]);
-//                    } catch (GetBlockRpcError err) {
-//                        getBlockError = err;
-//                    }
-//                    return response;
-//                }
-//
-//                protected void onPostExecute(GetBlockResponse response) {
-//                    // Here we are back on the main thread and could update the UI.
-//                    assertNotNull(response);
-//                    assertEquals("0181700002e623f2bf291b86a10a5cec4caab4954d4231f31f050f4f86f26116",
-//                            response.getId());
-//                    assertEquals(new BigInteger("2249927103"), response.getRefBlockPrefix());
-//                    assertEquals("de5493939e3abdca80deeab2fc9389cc43dc1982708653cfe6b225eb788d6659",
-//                            response.getActionMroot());
-//                    testLock.countDown();
-//                }
-//            }.execute(request);
-//
-//            try {
-//                testLock.await(5000, TimeUnit.MILLISECONDS);
-//            } catch (InterruptedException interruptedException) {
-//                fail("Interrupted waiting for getBlock() to complete: " +
-//                        interruptedException.getLocalizedMessage());
-//            }
-//
-//        } catch (Exception ex) {
-//            fail("Should not get exception when calling getBlock(): " + ex.getLocalizedMessage());
-//        } finally {
-//            try {
-//                server.shutdown();
-//            } catch (Exception ex) {
-//                // No need for anything here.
-//            }
-//        }
-//
-//    }
 
     @Test
     public void testGetAccountRpcCall() {
@@ -673,6 +746,40 @@ public class RpcProviderUnitTest {
             assertEquals("1000.0000 EOS", firstObject.get("balance"));
         } catch (Exception ex) {
             fail("Should not get exception when calling getTableRows(): " + ex.getLocalizedMessage()
+                    + "\n" + getStackTraceString(ex));
+        } finally {
+            try {
+                server.shutdown();
+            } catch (Exception ex) {
+                // No need for anything here.
+            }
+        }
+    }
+
+    @Test
+    public void testGetKvTableRowsRpcCall() {
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setResponseCode(200).setBody(GET_KV_TABLE_ROWS_RESPONSE));
+
+        try {
+            server.start();
+            String baseUrl = server.url("/").toString();
+
+            EosioJavaRpcProviderImpl rpcProvider = new EosioJavaRpcProviderImpl(
+                    baseUrl);
+
+            RequestBody requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), GET_KV_TABLE_ROWS_REQUEST);
+            String response = rpcProvider.getKvTableRows(requestBody);
+            assertNotNull(response);
+
+            JSONObject jsonObject = (JSONObject)parser.parse(response);
+            JSONArray jsonArray = (JSONArray)jsonObject.get("rows");
+            assertEquals(1, jsonArray.size());
+            String firstSerializedResult = (String)jsonArray.get(0);
+            assertEquals("002462663538316265652d396632632d343437622d393461642d3738653439383462366635312462663538316265652d396632632d343437622d393461642d37386534393834623666353100000000004013cd2462663538316265652d396632632d343437622d393461642d3738653439383462366635311a57726974652048656c6c6f20576f726c6420436f6e74726163742462663538316265652d396632632d343437622d393461642d373865343938346236663531002462663538316265652d396632632d343437622d393461642d37386534393834623666353194398a5f",
+                    firstSerializedResult);
+        } catch (Exception ex) {
+            fail("Should not get exception when calling getKvTableRows(): " + ex.getLocalizedMessage()
                     + "\n" + getStackTraceString(ex));
         } finally {
             try {
