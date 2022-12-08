@@ -100,6 +100,28 @@ public class EosioJavaRpcProviderImpl implements IRPCProvider {
     }
 
     /**
+     * Construct a new RPC provider instance given the base URL to use for building requests.
+     * @param baseURL Base URL to use for building requests.
+     * @param okHttpClient external OkHttpClient client.
+     * @throws EosioJavaRpcProviderInitializerError thrown if the base URL passed in is null.
+     */
+    public EosioJavaRpcProviderImpl(@NotNull String baseURL, @NotNull OkHttpClient okHttpClient) throws EosioJavaRpcProviderInitializerError {
+        if(baseURL == null || baseURL.isEmpty()) {
+            throw new EosioJavaRpcProviderInitializerError(EosioJavaRpcErrorConstants.RPC_PROVIDER_BASE_URL_EMPTY);
+        }
+
+        this.baseURL = baseURL;
+
+        this.retrofit = new Retrofit.Builder()
+                .baseUrl(baseURL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .build();
+
+        this.rpcProviderApi = this.retrofit.create(IEosioJavaRpcProviderApi.class);
+    }
+
+    /**
      * Process a retrofit call, setting arguments, checking responses and decoding responses and errors
      * as necessary.
      * @param call Retrofit call to execute.
